@@ -1,0 +1,23 @@
+'use strict';Object.defineProperty(exports, "__esModule", { value: true });var _logger = require('../services/logger');var _logger2 = _interopRequireDefault(_logger);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+const debug = (0, _logger2.default)('middleware:registerPushTokens', 'debug');
+
+// cache tokens in-mem to save needless duplicate db writes
+const cachedTokens = {};
+
+// FIXME: we have the potential for a race condition here as this middleware
+// depends on the auth middleware being run first - which is purley based on
+// alphabetical loading currently and thus, is quire unintuitive/brittle
+exports.default = controller => {
+  controller.middleware.receive.use(async function (bot, message, next) {
+    if (message.pushToken && message.user && message.pushToken !== cachedTokens[message.user]) {
+      debug('Saving push token for user: ', message.user);
+      const uid = message.user;
+      const pushToken = message.pushToken;
+      cachedTokens[uid] = pushToken;
+      controller.storage.users.save({ id: uid, pushToken });
+    }
+    next();
+  });
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL21pZGRsZXdhcmUvcmVnaXN0ZXJQdXNoVG9rZW5zLmpzIl0sIm5hbWVzIjpbImRlYnVnIiwiY2FjaGVkVG9rZW5zIiwiY29udHJvbGxlciIsIm1pZGRsZXdhcmUiLCJyZWNlaXZlIiwidXNlIiwiYm90IiwibWVzc2FnZSIsIm5leHQiLCJwdXNoVG9rZW4iLCJ1c2VyIiwidWlkIiwic3RvcmFnZSIsInVzZXJzIiwic2F2ZSIsImlkIl0sIm1hcHBpbmdzIjoiMkVBQUEsNEM7O0FBRUEsTUFBTUEsUUFBUSxzQkFBTywrQkFBUCxFQUF3QyxPQUF4QyxDQUFkOztBQUVBO0FBQ0EsTUFBTUMsZUFBZSxFQUFyQjs7QUFFQTtBQUNBO0FBQ0E7a0JBQ2VDLGNBQWM7QUFDM0JBLGFBQVdDLFVBQVgsQ0FBc0JDLE9BQXRCLENBQThCQyxHQUE5QixDQUFrQyxnQkFBZUMsR0FBZixFQUFvQkMsT0FBcEIsRUFBNkJDLElBQTdCLEVBQW1DO0FBQ25FLFFBQUlELFFBQVFFLFNBQVIsSUFBcUJGLFFBQVFHLElBQTdCLElBQXFDSCxRQUFRRSxTQUFSLEtBQXNCUixhQUFhTSxRQUFRRyxJQUFyQixDQUEvRCxFQUEyRjtBQUN6RlYsWUFBTSw4QkFBTixFQUFzQ08sUUFBUUcsSUFBOUM7QUFDQSxZQUFNQyxNQUFNSixRQUFRRyxJQUFwQjtBQUNBLFlBQU1ELFlBQVlGLFFBQVFFLFNBQTFCO0FBQ0FSLG1CQUFhVSxHQUFiLElBQW9CRixTQUFwQjtBQUNBUCxpQkFBV1UsT0FBWCxDQUFtQkMsS0FBbkIsQ0FBeUJDLElBQXpCLENBQThCLEVBQUVDLElBQUlKLEdBQU4sRUFBV0YsU0FBWCxFQUE5QjtBQUNEO0FBQ0REO0FBQ0QsR0FURDtBQVVELEMiLCJmaWxlIjoicmVnaXN0ZXJQdXNoVG9rZW5zLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGxvZ2dlciBmcm9tICcuLi9zZXJ2aWNlcy9sb2dnZXInXG5cbmNvbnN0IGRlYnVnID0gbG9nZ2VyKCdtaWRkbGV3YXJlOnJlZ2lzdGVyUHVzaFRva2VucycsICdkZWJ1ZycpXG5cbi8vIGNhY2hlIHRva2VucyBpbi1tZW0gdG8gc2F2ZSBuZWVkbGVzcyBkdXBsaWNhdGUgZGIgd3JpdGVzXG5jb25zdCBjYWNoZWRUb2tlbnMgPSB7fVxuXG4vLyBGSVhNRTogd2UgaGF2ZSB0aGUgcG90ZW50aWFsIGZvciBhIHJhY2UgY29uZGl0aW9uIGhlcmUgYXMgdGhpcyBtaWRkbGV3YXJlXG4vLyBkZXBlbmRzIG9uIHRoZSBhdXRoIG1pZGRsZXdhcmUgYmVpbmcgcnVuIGZpcnN0IC0gd2hpY2ggaXMgcHVybGV5IGJhc2VkIG9uXG4vLyBhbHBoYWJldGljYWwgbG9hZGluZyBjdXJyZW50bHkgYW5kIHRodXMsIGlzIHF1aXJlIHVuaW50dWl0aXZlL2JyaXR0bGVcbmV4cG9ydCBkZWZhdWx0IGNvbnRyb2xsZXIgPT4ge1xuICBjb250cm9sbGVyLm1pZGRsZXdhcmUucmVjZWl2ZS51c2UoYXN5bmMgZnVuY3Rpb24oYm90LCBtZXNzYWdlLCBuZXh0KSB7XG4gICAgaWYgKG1lc3NhZ2UucHVzaFRva2VuICYmIG1lc3NhZ2UudXNlciAmJiBtZXNzYWdlLnB1c2hUb2tlbiAhPT0gY2FjaGVkVG9rZW5zW21lc3NhZ2UudXNlcl0pIHtcbiAgICAgIGRlYnVnKCdTYXZpbmcgcHVzaCB0b2tlbiBmb3IgdXNlcjogJywgbWVzc2FnZS51c2VyKVxuICAgICAgY29uc3QgdWlkID0gbWVzc2FnZS51c2VyXG4gICAgICBjb25zdCBwdXNoVG9rZW4gPSBtZXNzYWdlLnB1c2hUb2tlblxuICAgICAgY2FjaGVkVG9rZW5zW3VpZF0gPSBwdXNoVG9rZW5cbiAgICAgIGNvbnRyb2xsZXIuc3RvcmFnZS51c2Vycy5zYXZlKHsgaWQ6IHVpZCwgcHVzaFRva2VuIH0pXG4gICAgfVxuICAgIG5leHQoKVxuICB9KVxufVxuIl19
